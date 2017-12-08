@@ -47,8 +47,7 @@ class InitGame {
 	}
 
 	clearLastGame() {
-		var lastGame = JSON.parse(localStorage.getItem('lastGame')) || [];
-		lastGame = [];
+		var lastGame = [];
 		localStorage.setItem('lastGame', JSON.stringify(lastGame));
 	}
 
@@ -72,8 +71,7 @@ class PlayGame {
 	}
 
 	clearLastGame() {
-		var lastGame = JSON.parse(localStorage.getItem('lastGame')) || [];
-		lastGame = [];
+		var lastGame = [];
 		localStorage.setItem('lastGame', JSON.stringify(lastGame));
 	}
 
@@ -129,6 +127,10 @@ class GameArea {
 		this.score = JSON.parse(localStorage.getItem('bestscore')) || [0, 0];
 		this.lastGame = JSON.parse(localStorage.getItem('lastGame')) || [];
 
+		if (window.devicePixelRatio >= 2 || screen.width < 600) {
+			new MobileRulers(this.myPlayer);
+		}
+
 	}
 
 	randomNumber() { return (Math.random() < 0.5 ? -1 : 1)*(Math.random() * 2);}
@@ -156,6 +158,7 @@ class GameArea {
 	update() {
 		for (var i = 0; i < this.follower.length; i++) {
 			if(this.myPlayer.collisionDetected(this.follower[i])) {
+				localStorage.setItem('lastGame', JSON.stringify(this.lastGame));
 				this.stop();
 				this.setHistoryItem();
 				new ScoreBlock(this.score[0], this.score[1]);
@@ -165,6 +168,7 @@ class GameArea {
 		
 		for (var i = 0; i < this.enemy.length; i++) {
 			if(this.myPlayer.collisionDetected(this.enemy[i])) {
+				localStorage.setItem('lastGame', JSON.stringify(this.lastGame));
 				this.stop();
 				this.setHistoryItem();
 				new ScoreBlock(this.score[0], this.score[1]);
@@ -266,7 +270,7 @@ class GameArea {
 		frameRecord.push([this.myPlayer.args, this.myPlayer.color]);
 		
 		this.lastGame.push(frameRecord);
-		localStorage.setItem('lastGame', JSON.stringify(this.lastGame));
+		
 	}
 
 	movePlayer(event) {
@@ -286,6 +290,50 @@ class GameArea {
 		} 
 
 		if (event.keyCode == 40) {
+			this.myPlayer.speedY = 4;
+		}
+	}
+}
+
+class MobileRulers {
+	constructor(player) {
+		this.rulers = document.createElement('div');
+		this.rulers.className = 'mobile-rulers';
+		this.rulers.innerHTML = '<div class="single">\
+			<img id="up" class="ruler" src="img/up.png" />\
+		</div>\
+		<div class="double">\
+			<img id="left" class="ruler" src="img/left.png" />\
+			<img id="right" class="ruler" src="img/right.png" />\
+		</div>\
+		<div class="single">\
+			<img id="down" class="ruler" src="img/down.png" />\
+		</div>';
+
+		document.querySelector('.game-wrapper').appendChild(this.rulers);	
+
+		this.myPlayer = player;
+
+		document.querySelector('.mobile-rulers').addEventListener('click', this.moveMobile.bind(this));
+	}
+
+	moveMobile(event) {
+		this.myPlayer.speedX = 0;
+		this.myPlayer.speedY = 0;
+
+		if (event.target.id == 'left') {
+			this.myPlayer.speedX = -4;
+		} 
+
+		if (event.target.id == 'right') {
+			this.myPlayer.speedX = 4;
+		} 
+
+		if (event.target.id == 'up') {
+			this.myPlayer.speedY = -4;
+		} 
+
+		if (event.target.id == 'down') {
 			this.myPlayer.speedY = 4;
 		}
 	}
